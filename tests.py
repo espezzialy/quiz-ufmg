@@ -129,3 +129,28 @@ def test_correct_selected_choices_exceeds_max_selections():
     
     with pytest.raises(Exception):
         question.correct_selected_choices([choice1.id, choice2.id])
+
+
+## Testes com fixture 
+
+@pytest.fixture
+def question_with_choices():
+    question = Question(title='Sample Question', points=10, max_selections=2)
+    question.add_choice('Option A', True)
+    question.add_choice('Option B', False)
+    question.add_choice('Option C', True)
+    return question
+
+def test_question_identifies_correct_answers(question_with_choices):
+    correct_ids = [choice.id for choice in question_with_choices.choices if choice.is_correct]
+    selected_correct = question_with_choices.correct_selected_choices(correct_ids)
+    
+    assert len(selected_correct) == 2
+    assert question_with_choices.choices[0].id in selected_correct  # Option A
+    assert question_with_choices.choices[2].id in selected_correct  # Option C
+
+def test_question_rejects_too_many_selections(question_with_choices):
+    all_choice_ids = [choice.id for choice in question_with_choices.choices]
+    
+    with pytest.raises(Exception):
+        question_with_choices.correct_selected_choices(all_choice_ids)
